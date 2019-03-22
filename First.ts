@@ -1,7 +1,7 @@
 const opponent = 'Mr Mine'
-const myMob = 'Gengar'
+const myMob = 'Gengar' // not allow the changes of the value
 const skills = ['Shadow ball', 'Thunderstrike', 'Physical']
-let opponentHP = 100
+let opponentHP = 100 // let allow the changes of the value
 let myMobHP = 100
 let isMyTurn = true
 const dmg = [50, 60, 70]
