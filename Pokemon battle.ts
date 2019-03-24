@@ -3,6 +3,8 @@ let myskillwithstatdamage = 0
 let myskillwithstatturn = 0
 let oppskillwithstatdamage = 0
 let oppskillwithstatturn = 0
+myskillwithstatturn! < 0
+oppskillwithstatturn! < 0
 
 let currentdmg = 0
 let opponentMob = {
@@ -202,7 +204,7 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       //   console.log(currentdmg * 0.1)
       //   opponentMob.ohp = opponentMob.ohp - (currentdmg * 0.1)
     }
-    else if (myMobSkills[selectedSkills].type === ['grass', 'fire', 'water']) {
+    else if (myMobSkills[selectedSkills].type === 'grass' || myMobSkills[selectedSkills].type === 'fire' || myMobSkills[selectedSkills].type === 'water') {
       myskillwithstatturn = 0
       let a = myMobSkills[selectedSkills].damage
       currentdmg = element(myMobSkills[selectedSkills].type, opponentMob.oelement, myMobSkills[selectedSkills].damage)
@@ -219,9 +221,13 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       opponentMob.ohp = currenthp(opponentMob.ohp, myMobSkills[selectedSkills].damage)
       resultMessage(defendername, opponentMob.ohp)
     }
-    oppskillwithstatturn! < 0
-    myMob.HP = skillstatus(myMob.Name, oppskillwithstatturn, oppskillwithstatdamage, myMob.HP)
-    oppskillwithstatturn = oppskillwithstatturn - 1
+    if (oppskillwithstatturn != 0) {
+      oppskillwithstatturn! < 0
+      myMob.HP = skillstatus(myMob.Name, oppskillwithstatturn, oppskillwithstatdamage, myMob.HP)
+      oppskillwithstatturn = oppskillwithstatturn - 1
+    } else {
+      oppskillwithstatturn = 0
+    }
   }
 
   else {
@@ -272,9 +278,13 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       myMob.HP = currenthp(myMob.HP, oppSkills[Num].osdamage)
       resultMessage(defendername, myMob.HP)
     }
-    myskillwithstatturn! < 0
-    opponentMob.ohp = skillstatus(opponentMob.oname, myskillwithstatturn, myskillwithstatdamage, opponentMob.ohp)
-    myskillwithstatturn = myskillwithstatturn - 1
+    if (myskillwithstatturn != 0) {
+      myskillwithstatturn! < 0
+      opponentMob.ohp = skillstatus(opponentMob.oname, myskillwithstatturn, myskillwithstatdamage, opponentMob.ohp)
+      myskillwithstatturn = myskillwithstatturn - 1
+    } else {
+      myskillwithstatdamage = 0
+    }
   }
   isMyTurn = !isMyTurn
 }
