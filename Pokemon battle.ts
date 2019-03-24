@@ -103,15 +103,16 @@ function displaycurrentdamage(c) {
 }
 
 function resultMessage(defname, defhp) {
-  console.log('Critical Hit. ' + defname + ' health reduced to ' + defhp + '.')
+  console.log(defname + ' health reduced to ' + defhp + '.')
   console.log('-------------------------------------------------------------')
 }
 
-function veryeffectiveMessage(dmg, defname, defhp) {
-  if (dmg = 0) {
-    console.log('Not Effective. ' + defname + ' health not reduce. HP remained  ' + defhp + '.')
+function effectivenessMessage(dmg, skilldmg, defname, defhp) {
+  if (dmg = 0 || dmg <= skilldmg) {
+    console.log('Less / Not Effective. ' + defname + ' HP left ' + defhp + '.')
     console.log('-------------------------------------------------------------')
-  } else {
+  }
+  else {
     console.log('Critical Hit. ' + defname + ' health reduced to ' + defhp + '.')
     console.log('-------------------------------------------------------------')
   }
@@ -120,8 +121,11 @@ function veryeffectiveMessage(dmg, defname, defhp) {
 function element(myelement, mobelement, dmg) {
   if (myelement === 'water' && mobelement === 'fire' || myelement === 'fire' && mobelement === 'grass' || myelement === 'grass' && mobelement === 'water') {
     return dmg = dmg * 2
-  } else {
+  } else if (myelement === 'fire' && mobelement === 'water' || myelement === 'grass' && mobelement === 'fire' || myelement === 'water' && mobelement === 'grass') {
     return dmg = dmg * 0.5
+  }
+  else {
+    return dmg = dmg
   }
 }
 
@@ -156,35 +160,31 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       currentdmg = displaycurrentdamage(currentdmg)
       opponentMob.ohp = currenthp(opponentMob.ohp, currentdmg)
       console.log('Your physical damage dropped to ' + currentdmg + ' due to ' + opponentMob.oname + ' physical defense.')
-      if (currentdmg = 0) {
-        console.log('Not Effective. ' + defendername + ' health not reduce. HP remained  ' + opponentMob.ohp + '.')
-        console.log('-------------------------------------------------------------')
-      } else {
-        console.log('Critical Hit. ' + defendername + ' health reduced to ' + opponentMob.ohp + '.')
-        console.log('-------------------------------------------------------------')
-      }
+      effectivenessMessage(currentdmg, myMobSkills[selectedSkills].damage, defendername, opponentMob.ohp)
+      // if (currentdmg = 0) {
+      //   console.log('Not Effective. ' + defendername + ' health not reduce. HP remained  ' + opponentMob.ohp + '.')
+      //   console.log('-------------------------------------------------------------')
+      // } else {
+      //   console.log('Critical Hit. ' + defendername + ' health reduced to ' + opponentMob.ohp + '.')
+      //   console.log('-------------------------------------------------------------')
+      // }
     } else if (myMobSkills[selectedSkills].type === 'armorbreak') {
       currentdmg = armorbreakdamage(myMobSkills[selectedSkills].damage, opponentMob.odef)
       currentdmg = displaycurrentdamage(currentdmg)
       opponentMob.ohp = currenthp(opponentMob.ohp, currentdmg)
       console.log('Your armor break skill only dealed ' + currentdmg + ' damage.')
-      if (currentdmg = 0) {
-        console.log('Not Effective. ' + defendername + ' health not reduce. HP remained  ' + opponentMob.ohp + '.')
-        console.log('-------------------------------------------------------------')
-      } else {
-        console.log('Critical Hit. ' + defendername + ' health reduced to ' + opponentMob.ohp + '.')
-        console.log('-------------------------------------------------------------')
-      }
+      effectivenessMessage(currentdmg, myMobSkills[selectedSkills].damage, defendername, opponentMob.ohp)
 
     } else if (myMobSkills[selectedSkills].type != null) {
-      let a = currentdmg
+      let a = myMobSkills[selectedSkills].damage
       currentdmg = element(myMobSkills[selectedSkills].type, opponentMob.oelement, myMobSkills[selectedSkills].damage)
       opponentMob.ohp = opponentMob.ohp - currentdmg
       if (currentdmg > a) {
-        console.log('Your skills is very effective. Damage increased to ' + currentdmg)
-        resultMessage(defendername, opponentMob.ohp)
+        console.log('Your skills is very effective. Damage increased to ' + currentdmg + ' DMG.')
+        effectivenessMessage(currentdmg, myMobSkills[selectedSkills].damage, defendername, opponentMob.ohp)
       } else {
-        console.log('Your skills is less effective. Damage decreased to ' + currentdmg)
+        console.log('Your skills is less effective. Damage decreased to ' + currentdmg + ' DMG.')
+        effectivenessMessage(currentdmg, myMobSkills[selectedSkills].damage, defendername, opponentMob.ohp)
       }
     }
     // else if (myMobSkills[selectedSkills].type === 'poison') {
@@ -199,8 +199,7 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
     // }
     else {
       opponentMob.ohp = currenthp(opponentMob.ohp, myMobSkills[selectedSkills].damage)
-      console.log('Critical Hit. ' + defendername + ' health reduced to ' + opponentMob.ohp + '.')
-      console.log('-------------------------------------------------------------')
+      resultMessage(defendername, opponentMob.ohp)
     }
 
 
@@ -212,31 +211,36 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       currentdmg = displaycurrentdamage(currentdmg)
       myMob.HP = currenthp(myMob.HP, currentdmg)
       console.log('Enemy damage dropped to ' + currentdmg + ' due to ' + myMob.Name + ' physical defense.')
-      if (currentdmg = 0) {
-        console.log('Not Effective. ' + defendername + ' health not reduce. HP remained ' + myMob.HP + '.')
-        console.log('-------------------------------------------------------------')
-      }
-      else {
-        console.log('Critical Hit. ' + defendername + ' health reduced to ' + myMob.HP + '.')
-        console.log('-------------------------------------------------------------')
-      }
+      effectivenessMessage(currentdmg, oppSkills[Num].osdamage, defendername, myMob.HP)
+      // if (currentdmg = 0) {
+      //   console.log('Not Effective. ' + defendername + ' health not reduce. HP remained ' + myMob.HP + '.')
+      //   console.log('-------------------------------------------------------------')
+      // }
+      // else {
+      //   console.log('Critical Hit. ' + defendername + ' health reduced to ' + myMob.HP + '.')
+      //   console.log('-------------------------------------------------------------')
+      // }
     } else if (oppSkills[Num].ostype === 'armorbreak') {
       currentdmg = armorbreakdamage(oppSkills[Num].osdamage, myMob.Def)
       currentdmg = displaycurrentdamage(currentdmg)
       myMob.HP = currenthp(myMob.HP, currentdmg)
       console.log('Enemy armor break skill dealed ' + currentdmg + ' damage.')
-      if (currentdmg = 0) {
-        console.log('Not Effective. ' + defendername + ' health not reduce. HP remained ' + myMob.HP + '.')
-        console.log('-------------------------------------------------------------')
+      effectivenessMessage(currentdmg, oppSkills[Num].osdamage, defendername, myMob.HP)
+    } else if (oppSkills[Num].ostype != null) {
+      let a = currentdmg
+      currentdmg = element(oppSkills[Num].ostype, opponentMob.oelement, oppSkills[Num].osdamage)
+      myMob.HP = myMob.HP - currentdmg
+      if (currentdmg > a) {
+        console.log(opponentMob.ohp + ' skills is very effective. Damage increased to ' + currentdmg)
+        effectivenessMessage(currentdmg, oppSkills[Num].osdamage, defendername, myMob.HP)
       } else {
-        console.log('Critical Hit. ' + defendername + ' health reduced to ' + myMob.HP + '.')
-        console.log('-------------------------------------------------------------')
+        console.log(opponentMob.ohp + ' skills is less effective. Damage decreased to ' + currentdmg)
+        effectivenessMessage(currentdmg, oppSkills[Num].osdamage, defendername, myMob.HP)
       }
     }
     else {
       myMob.HP = currenthp(myMob.HP, oppSkills[Num].osdamage)
-      console.log('Critical Hit. ' + defendername + ' health reduced to ' + myMob.HP + '.')
-      console.log('-------------------------------------------------------------')
+      resultMessage(defendername, myMob.HP)
     }
   }
   isMyTurn = !isMyTurn
