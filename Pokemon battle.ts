@@ -1,9 +1,13 @@
 import { question } from 'readline-sync'
+let myskillwithstatdamage = 0
+let myskillwithstatturn = 0
+let oppskillwithstatdamage = 0
+let oppskillwithstatturn = 0
+
 let currentdmg = 0
-let testing = 0
 let opponentMob = {
   oname: 'Mr. Mime',
-  ohp: 200,
+  ohp: 250,
   odef: 10,
   oatk: 10,
   oelement: 'fire'
@@ -21,8 +25,9 @@ const oppSkills = [
   },
   {
     osname: 'Paralyze',
-    osdamage: 40,
-    ostype: 'sleep'
+    osdamage: 20,
+    ostype: 'poison',
+    turn: 5
   },
   {
     osname: 'Body Slam',
@@ -39,7 +44,7 @@ const oppSkills = [
 let isMyTurn = true
 let myMob = {
   Name: 'Gangar',
-  HP: 300,
+  HP: 350,
   Def: 20,
   Atk: 40,
   element: 'dark'
@@ -52,9 +57,8 @@ const myMobSkills = [
   },
   {
     sname: 'Shadow ball',
-    damage: 50,
+    damage: 20,
     type: 'poison',
-    dmgperround: 1,
     turn: 5
   },
   {
@@ -87,13 +91,24 @@ function armorbreakdamage(a, b) {
   return (a * 1.5) - b
 }
 
-function poisondamage(a, b) {
-  return a - b
+function skillstatus(name, turn, skilldmg, hp) {
+  let ahp = hp
+  if (turn != 0) {
+    let dps = skilldmg * 0.1
+    let ahp = currenthp(hp, dps)
+    console.log('Poison status turn: ' + turn)
+    console.log('Poison damage: ' + dps)
+    console.log(name + ' current HP: ' + ahp)
+    return (ahp)
+  } else {
+    return (hp)
+  }
 }
 
 function currenthp(a, b) {
   return a - b
 }
+
 function displaycurrentdamage(c) {
   if (c < 0) {
     return c = 0
@@ -139,7 +154,6 @@ function displaySkills(array) {
   }
 }
 
-
 console.log('You have encounter ' + opponentMob.oname + '.')
 console.log('You send in ' + myMob.Name + '.')
 console.log(myMob.Name + ' health : ' + myMob.HP)
@@ -150,7 +164,6 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
   console.log('-------------------------------------------------------------')
   let attackername = isMyTurn ? myMob.Name : opponentMob.oname
   let defendername = isMyTurn ? opponentMob.oname : myMob.Name
-
   if (isMyTurn) {
     displaySkills(myMobSkills)
     let selectedSkills = question('Select a Skill: ')
@@ -175,7 +188,22 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       console.log('Your armor break skill only dealed ' + currentdmg + ' damage.')
       effectivenessMessage(currentdmg, myMobSkills[selectedSkills].damage, defendername, opponentMob.ohp)
 
-    } else if (myMobSkills[selectedSkills].type != null) {
+    } else if (myMobSkills[selectedSkills].type === 'poison') {
+      currentdmg = armorbreakdamage(myMobSkills[selectedSkills].damage, opponentMob.odef)
+      currentdmg = displaycurrentdamage(currentdmg)
+      opponentMob.ohp = currenthp(opponentMob.ohp, currentdmg)
+      console.log('Enemy current HP ' + opponentMob.ohp + '.')
+      myskillwithstatturn = myMobSkills[selectedSkills].turn
+      myskillwithstatdamage = myMobSkills[selectedSkills].damage
+      // let i: number
+      // for (i = myMobSkills[selectedSkills].turn; i >= 1; i--) {
+      //   let a: number
+      //   console.log(opponentMob.ohp)
+      //   console.log(currentdmg * 0.1)
+      //   opponentMob.ohp = opponentMob.ohp - (currentdmg * 0.1)
+    }
+    else if (myMobSkills[selectedSkills].type === ['grass', 'fire', 'water']) {
+      myskillwithstatturn = 0
       let a = myMobSkills[selectedSkills].damage
       currentdmg = element(myMobSkills[selectedSkills].type, opponentMob.oelement, myMobSkills[selectedSkills].damage)
       opponentMob.ohp = opponentMob.ohp - currentdmg
@@ -187,23 +215,16 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
         effectivenessMessage(currentdmg, myMobSkills[selectedSkills].damage, defendername, opponentMob.ohp)
       }
     }
-    // else if (myMobSkills[selectedSkills].type === 'poison') {
-    //   opponentMob.ohp = opponentMob.ohp - myMobSkills[selectedSkills].damage
-    //   console.log('Poisoned damage per round: ' + myMobSkills[selectedSkills].dmgperround)
-    //   for (let i = 5; i! < 0; i--) {
-    //     opponentMob.ohp = poisondamage(opponentMob.ohp, myMobSkills[selectedSkills].dmgperround)
-    //   }
-    //   console.log('Critical Hit. ' + defendername + ' health reduced to ' + opponentMob.ohp + '.')
-    //   console.log('-------------------------------------------------------------')
-    //   testing = myMobSkills[selectedSkills].type
-    // }
     else {
       opponentMob.ohp = currenthp(opponentMob.ohp, myMobSkills[selectedSkills].damage)
       resultMessage(defendername, opponentMob.ohp)
     }
+    oppskillwithstatturn! < 0
+    myMob.HP = skillstatus(myMob.Name, oppskillwithstatturn, oppskillwithstatdamage, myMob.HP)
+    oppskillwithstatturn = oppskillwithstatturn - 1
+  }
 
-
-  } else {
+  else {
     const Num = Math.floor(Math.random() * 5)
     console.log(attackername + ' use ' + oppSkills[Num].osname + '. ' + oppSkills[Num].osname + ' hits for ' + oppSkills[Num].osdamage + ' DMG.')
     if (oppSkills[Num].ostype === 'physical') {
@@ -226,15 +247,24 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       myMob.HP = currenthp(myMob.HP, currentdmg)
       console.log('Enemy armor break skill dealed ' + currentdmg + ' damage.')
       effectivenessMessage(currentdmg, oppSkills[Num].osdamage, defendername, myMob.HP)
-    } else if (oppSkills[Num].ostype != null) {
+    } else if (oppSkills[Num].ostype === 'poison') {
+      currentdmg = armorbreakdamage(oppSkills[Num].osdamage, opponentMob.odef)
+      currentdmg = displaycurrentdamage(currentdmg)
+      myMob.HP = currenthp(myMob.HP, currentdmg)
+      console.log('Your current HP ' + myMob.HP + '.')
+      oppskillwithstatturn = oppSkills[Num].turn
+      oppskillwithstatdamage = oppSkills[Num].osdamage
+    }
+    else if (oppSkills[Num].ostype === 'grass' || oppSkills[Num].ostype === 'fire' || oppSkills[Num].ostype === 'water') {
+      oppskillwithstatturn = 0
       let a = currentdmg
       currentdmg = element(oppSkills[Num].ostype, opponentMob.oelement, oppSkills[Num].osdamage)
       myMob.HP = myMob.HP - currentdmg
       if (currentdmg > a) {
-        console.log(opponentMob.ohp + ' skills is very effective. Damage increased to ' + currentdmg)
+        console.log(opponentMob.oname + ' skills is very effective. Damage increased to ' + currentdmg)
         effectivenessMessage(currentdmg, oppSkills[Num].osdamage, defendername, myMob.HP)
       } else {
-        console.log(opponentMob.ohp + ' skills is less effective. Damage decreased to ' + currentdmg)
+        console.log(opponentMob.oname + ' skills is less effective. Damage decreased to ' + currentdmg)
         effectivenessMessage(currentdmg, oppSkills[Num].osdamage, defendername, myMob.HP)
       }
     }
@@ -242,6 +272,9 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       myMob.HP = currenthp(myMob.HP, oppSkills[Num].osdamage)
       resultMessage(defendername, myMob.HP)
     }
+    myskillwithstatturn! < 0
+    opponentMob.ohp = skillstatus(opponentMob.oname, myskillwithstatturn, myskillwithstatdamage, opponentMob.ohp)
+    myskillwithstatturn = myskillwithstatturn - 1
   }
   isMyTurn = !isMyTurn
 }
