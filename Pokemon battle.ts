@@ -14,6 +14,7 @@ let opponentMob = {
   oatk: 10,
   oelement: 'fire'
 }
+
 const oppSkills = [
   {
     osname: 'Atk',
@@ -26,7 +27,7 @@ const oppSkills = [
     ostype: 'armorbreak'
   },
   {
-    osname: 'Paralyze',
+    osname: 'Poison',
     osdamage: 20,
     ostype: 'poison',
     turn: 5
@@ -37,9 +38,9 @@ const oppSkills = [
     ostype: 'physical'
   },
   {
-    osname: 'Harden',
-    osdamage: 10,
-    ostype: 'physical'
+    osname: 'Paralyze',
+    osdamage: 0,
+    ostype: 'sleep'
   }
 ]
 
@@ -51,6 +52,7 @@ let myMob = {
   Atk: 40,
   element: 'dark'
 }
+
 const myMobSkills = [
   {
     sname: 'Atk',
@@ -82,6 +84,11 @@ const myMobSkills = [
     sname: 'Water Blast',
     damage: 30,
     type: 'water'
+  },
+  {
+    sname: 'Hypnotize',
+    damage: 0,
+    type: 'sleep'
   }
 ]
 
@@ -148,7 +155,7 @@ function element(myelement, mobelement, dmg) {
 
 function displaySkills(array) {
   let i = 0
-  while (i < 6) {
+  while (i < 7) {
     console.log(i + '. ' + array[i].sname + ', Damage:' + array[i].damage)
 
     // i += 1
@@ -167,6 +174,13 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
   let attackername = isMyTurn ? myMob.Name : opponentMob.oname
   let defendername = isMyTurn ? opponentMob.oname : myMob.Name
   if (isMyTurn) {
+    if (oppskillwithstatturn != 0) {
+      oppskillwithstatturn! < 0
+      myMob.HP = skillstatus(myMob.Name, oppskillwithstatturn, oppskillwithstatdamage, myMob.HP)
+      oppskillwithstatturn = oppskillwithstatturn - 1
+    } else {
+      oppskillwithstatturn = 0
+    }
     displaySkills(myMobSkills)
     let selectedSkills = question('Select a Skill: ')
     console.log(attackername + ' use ' + myMobSkills[selectedSkills].sname + '. ' + myMobSkills[selectedSkills].sname + ' hits for ' + myMobSkills[selectedSkills].damage + ' DMG.')
@@ -194,6 +208,7 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       currentdmg = armorbreakdamage(myMobSkills[selectedSkills].damage, opponentMob.odef)
       currentdmg = displaycurrentdamage(currentdmg)
       opponentMob.ohp = currenthp(opponentMob.ohp, currentdmg)
+      console.log('Enemy is poisoned.')
       console.log('Enemy current HP ' + opponentMob.ohp + '.')
       myskillwithstatturn = myMobSkills[selectedSkills].turn
       myskillwithstatdamage = myMobSkills[selectedSkills].damage
@@ -203,6 +218,13 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       //   console.log(opponentMob.ohp)
       //   console.log(currentdmg * 0.1)
       //   opponentMob.ohp = opponentMob.ohp - (currentdmg * 0.1)
+    } else if (myMobSkills[selectedSkills].type === 'sleep') {
+      currentdmg = armorbreakdamage(myMobSkills[selectedSkills].damage, opponentMob.odef)
+      currentdmg = displaycurrentdamage(currentdmg)
+      opponentMob.ohp = currenthp(opponentMob.ohp, currentdmg)
+      console.log('Enemy Sleep for 1 turn.')
+      console.log("It's your turn.")
+      isMyTurn = !isMyTurn
     }
     else if (myMobSkills[selectedSkills].type === 'grass' || myMobSkills[selectedSkills].type === 'fire' || myMobSkills[selectedSkills].type === 'water') {
       myskillwithstatturn = 0
@@ -221,16 +243,15 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       opponentMob.ohp = currenthp(opponentMob.ohp, myMobSkills[selectedSkills].damage)
       resultMessage(defendername, opponentMob.ohp)
     }
-    if (oppskillwithstatturn != 0) {
-      oppskillwithstatturn! < 0
-      myMob.HP = skillstatus(myMob.Name, oppskillwithstatturn, oppskillwithstatdamage, myMob.HP)
-      oppskillwithstatturn = oppskillwithstatturn - 1
-    } else {
-      oppskillwithstatturn = 0
-    }
   }
-
   else {
+    if (myskillwithstatturn != 0) {
+      myskillwithstatturn! < 0
+      opponentMob.ohp = skillstatus(opponentMob.oname, myskillwithstatturn, myskillwithstatdamage, opponentMob.ohp)
+      myskillwithstatturn = myskillwithstatturn - 1
+    } else {
+      myskillwithstatdamage = 0
+    }
     const Num = Math.floor(Math.random() * 5)
     console.log(attackername + ' use ' + oppSkills[Num].osname + '. ' + oppSkills[Num].osname + ' hits for ' + oppSkills[Num].osdamage + ' DMG.')
     if (oppSkills[Num].ostype === 'physical') {
@@ -257,9 +278,17 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
       currentdmg = armorbreakdamage(oppSkills[Num].osdamage, opponentMob.odef)
       currentdmg = displaycurrentdamage(currentdmg)
       myMob.HP = currenthp(myMob.HP, currentdmg)
+      console.log('You are poisoned.')
       console.log('Your current HP ' + myMob.HP + '.')
       oppskillwithstatturn = oppSkills[Num].turn
       oppskillwithstatdamage = oppSkills[Num].osdamage
+    } else if (oppSkills[Num].ostype === 'sleep') {
+      currentdmg = armorbreakdamage(oppSkills[Num].osdamage, opponentMob.odef)
+      currentdmg = displaycurrentdamage(currentdmg)
+      myMob.HP = currenthp(myMob.HP, currentdmg)
+      console.log(opponentMob.oname + ' put you in sleep for 1 turn.')
+      console.log("It's still enemy turn.")
+      isMyTurn = true
     }
     else if (oppSkills[Num].ostype === 'grass' || oppSkills[Num].ostype === 'fire' || oppSkills[Num].ostype === 'water') {
       oppskillwithstatturn = 0
@@ -277,13 +306,6 @@ while (myMob.HP > 0 && opponentMob.ohp > 0) {
     else {
       myMob.HP = currenthp(myMob.HP, oppSkills[Num].osdamage)
       resultMessage(defendername, myMob.HP)
-    }
-    if (myskillwithstatturn != 0) {
-      myskillwithstatturn! < 0
-      opponentMob.ohp = skillstatus(opponentMob.oname, myskillwithstatturn, myskillwithstatdamage, opponentMob.ohp)
-      myskillwithstatturn = myskillwithstatturn - 1
-    } else {
-      myskillwithstatdamage = 0
     }
   }
   isMyTurn = !isMyTurn
